@@ -8,6 +8,7 @@ pub struct Campaign {
     pub raised: u64,
     pub deadline: i64,
     pub vault: Pubkey,
+    pub description: String,
 }
 
 impl Campaign {
@@ -16,5 +17,6 @@ impl Campaign {
         8 + // goal
         8 + // raised
         8 + // deadline
-        32; // vault pubkey
+        32 + // vault pubkey
+        4 + 280; // description (max 280 chars)
 }

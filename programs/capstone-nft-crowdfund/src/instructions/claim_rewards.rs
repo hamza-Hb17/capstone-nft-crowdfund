@@ -1,4 +1,6 @@
-use crate::state::{Campaign, ClaimRecord, ContributionAccount};
+use crate::state::campaign::Campaign;
+use crate::state::claim_record::ClaimRecord;
+use crate::state::contribution::ContributionAccount;
 use anchor_lang::prelude::*;
 
 #[derive(Accounts)]

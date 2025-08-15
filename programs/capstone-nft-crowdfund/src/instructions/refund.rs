@@ -1,4 +1,5 @@
-use crate::state::*;
+use crate::state::campaign::Campaign;
+use crate::state::contribution::ContributionAccount;
 use anchor_lang::prelude::*;
 
 #[derive(Accounts)]
@@ -7,7 +8,7 @@ pub struct ClaimRefund<'info> {
     pub contributor: Signer<'info>,
 
     #[account(mut)]
-    pub campaign: Account<'info, CampaignAccount>,
+    pub campaign: Account<'info, Campaign>,
 
     #[account(
         mut,

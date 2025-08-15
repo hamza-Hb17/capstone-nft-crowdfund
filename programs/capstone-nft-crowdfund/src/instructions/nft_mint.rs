@@ -43,8 +43,9 @@ pub struct MintNft<'info> {
 }
 
 pub fn mint_nft(ctx: Context<MintNft>) -> Result<()> {
-    let mint_authority_bump = ctx.bumps.mint_authority;
-    let mint_authority_seeds: &[&[u8]] = &[b"mint_authority", &[mint_authority_bump]];
+    let mint_authority_seeds: &[&[u8]] = &[b"mint_authority", &[ctx.bumps.mint_authority]];
+
+    let signer_seeds = &[mint_authority_seeds];
 
     let cpi_ctx = CpiContext::new_with_signer(
         ctx.accounts.token_program.to_account_info(),
@@ -53,7 +54,7 @@ pub fn mint_nft(ctx: Context<MintNft>) -> Result<()> {
             to: ctx.accounts.token_account.to_account_info(),
             authority: ctx.accounts.mint_authority.to_account_info(),
         },
-        &[mint_authority_seeds],
+        signer_seeds,
     );
 
     token::mint_to(cpi_ctx, 1)?;

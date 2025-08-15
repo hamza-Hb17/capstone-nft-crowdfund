@@ -14,7 +14,7 @@ pub struct CreateCampaign<'info> {
         init,
         payer = creator,
         space = 8 + Campaign::LEN,
-        seeds = [b"campaign", creator.key().as_ref(), args.title.as_bytes()],
+        seeds = [b"campaign", creator.key().as_ref()],
         bump
     )]
     pub campaign: Account<'info, Campaign>,

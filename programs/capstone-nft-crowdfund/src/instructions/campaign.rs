@@ -1,4 +1,6 @@
-use crate::state::{campaign::Campaign, reward_vault::RewardVault, vault::Vault};
+use crate::state::{
+    campaign::Campaign, contribution::ContributionAccount, reward_vault::RewardVault, vault::Vault,
+};
 use anchor_lang::prelude::*;
 
 use crate::error::ErrorCode;
@@ -11,13 +13,14 @@ pub struct CreateCampaign<'info> {
     #[account(
         init,
         payer = creator,
-        space = 8 + Campaign::MAX_SIZE,
+        space = 8 + Campaign::LEN,
         seeds = [b"campaign", creator.key().as_ref(), args.title.as_bytes()],
         bump
     )]
     pub campaign: Account<'info, Campaign>,
 
     #[account(
+        init,
         payer = creator,
         space = 8 + Vault::LEN,
         seeds = [b"vault", campaign.key().as_ref()],
@@ -54,12 +57,12 @@ pub fn create_campaign(ctx: Context<CreateCampaign>, args: CreateCampaignArgs) -
     campaign.raised = 0;
     campaign.vault = ctx.accounts.vault.key(); // store PDA vault address
     campaign.description = args.description;
-    campaign.bump = *ctx.bumps.get("campaign").unwrap();
+    campaign.bump = ctx.bumps.campaign;
 
     let reward_vault = &mut ctx.accounts.reward_vault;
     reward_vault.campaign = campaign.key();
     reward_vault.total_distributed = 0;
-    reward_vault.bump = *ctx.bumps.get("reward_vault").unwrap();
+    reward_vault.bump = ctx.bumps.reward_vault;
 
     Ok(())
 }
@@ -69,14 +72,14 @@ pub struct Contribute<'info> {
     #[account(mut)]
     pub contributor: Signer<'info>,
 
-    #[account(mut)]
-    pub campaign: Account<'info, CampaignAccount>,
+    #[account(mut, seeds = [b"campaign", campaign.creator.as_ref()], bump = campaign.bump)]
+    pub campaign: Account<'info, Campaign>,
 
     #[account(
         init_if_needed,
         payer = contributor,
-        space = 8 + ContributionAccount::SIZE,
-        seeds = [b"contribution", campaign.key().as_ref(), contributor.key().as_ref()],
+        space = ContributionAccount::LEN,
+        seeds = [b"contribution", contributor.key().as_ref(), campaign.key().as_ref()],
         bump
     )]
     pub contribution: Account<'info, ContributionAccount>,
@@ -100,16 +103,22 @@ pub fn contribute_to_campaign(ctx: Context<Contribute>, amount: u64) -> Result<(
     let campaign = &mut ctx.accounts.campaign;
     let contributor = &mut ctx.accounts.contributor;
     let vault = &mut ctx.accounts.vault;
+    let contribution = &mut ctx.accounts.contribution;
 
     // Transfer lamports to vault PDA
     **contributor.to_account_info().try_borrow_mut_lamports()? -= amount;
     **vault.to_account_info().try_borrow_mut_lamports()? += amount;
 
     // Update campaign state
-    ctx.accounts.campaign.raised += amount;
+    campaign.raised += amount;
 
     // Update user's contribution
-    ctx.accounts.contribution.amount += amount; // Update user's contribution
+    contribution.amount += amount; // Update user's contribution
+
+    contribution.contributor = ctx.accounts.contributor.key();
+    contribution.campaign = campaign.key();
+    contribution.amount = contribution.amount.checked_add(amount).unwrap();
+    contribution.bump = ctx.bumps.contribution;
 
     Ok(())
 }

@@ -9,6 +9,7 @@ pub struct Campaign {
     pub deadline: i64,
     pub vault: Pubkey,
     pub description: String,
+    pub bump: u8,
 }
 
 impl Campaign {

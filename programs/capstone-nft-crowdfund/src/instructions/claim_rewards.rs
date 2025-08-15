@@ -1,4 +1,4 @@
-use crate::state::{CampaignAccount, ClaimRecord, ContributionAccount};
+use crate::state::{Campaign, ClaimRecord, ContributionAccount};
 use anchor_lang::prelude::*;
 
 #[derive(Accounts)]
@@ -8,10 +8,10 @@ pub struct ClaimRewards<'info> {
 
     #[account(
         mut,
-        seeds = [b"campaign", campaign.id.as_ref()],
+        seeds = [b"campaign", campaign.key().as_ref()],
         bump = campaign.bump
     )]
-    pub campaign: Account<'info, CampaignAccount>,
+    pub campaign: Account<'info, Campaign>,
 
     #[account(
         mut,

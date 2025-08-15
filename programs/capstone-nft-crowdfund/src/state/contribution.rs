@@ -9,5 +9,5 @@ pub struct ContributionAccount {
 }
 
 impl ContributionAccount {
-    pub const SIZE: usize = 32 + 32 + 8 + 1;
+    pub const LEN: usize = 32 + 32 + 8 + 1;
 }

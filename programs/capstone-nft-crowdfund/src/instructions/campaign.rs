@@ -1,4 +1,4 @@
-use crate::state::{campaign::Campaign, vault::Vault};
+use crate::state::{campaign::Campaign, reward_vault::RewardVault, vault::Vault};
 use anchor_lang::prelude::*;
 
 use crate::error::ErrorCode;
@@ -11,19 +11,28 @@ pub struct CreateCampaign<'info> {
     #[account(
         init,
         payer = creator,
-        space = 8 + CampaignAccount::MAX_SIZE,
+        space = 8 + Campaign::MAX_SIZE,
         seeds = [b"campaign", creator.key().as_ref(), args.title.as_bytes()],
         bump
     )]
-    pub campaign: Account<'info, CampaignAccount>,
+    pub campaign: Account<'info, Campaign>,
 
     #[account(
+        payer = creator,
+        space = 8 + Vault::LEN,
         seeds = [b"vault", campaign.key().as_ref()],
         bump,
-        payer = creator,
-        space = 8 + Vault::LEN
     )]
     pub vault: Account<'info, Vault>,
+
+    #[account(
+        init,
+        payer = creator,
+        space = RewardVault::LEN,
+        seeds = [b"reward_vault", campaign.key().as_ref()],
+        bump
+    )]
+    pub reward_vault: Account<'info, RewardVault>,
 
     pub system_program: Program<'info, System>,
 }
@@ -43,8 +52,14 @@ pub fn create_campaign(ctx: Context<CreateCampaign>, args: CreateCampaignArgs) -
     campaign.goal = args.goal;
     campaign.deadline = args.deadline;
     campaign.raised = 0;
-    campaign.vault = ctx.accounts.vault.key(); // ✅ store PDA vault address
+    campaign.vault = ctx.accounts.vault.key(); // store PDA vault address
     campaign.description = args.description;
+    campaign.bump = *ctx.bumps.get("campaign").unwrap();
+
+    let reward_vault = &mut ctx.accounts.reward_vault;
+    reward_vault.campaign = campaign.key();
+    reward_vault.total_distributed = 0;
+    reward_vault.bump = *ctx.bumps.get("reward_vault").unwrap();
 
     Ok(())
 }

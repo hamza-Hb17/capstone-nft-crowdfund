@@ -18,12 +18,12 @@ pub mod defi_nft_crowdfunding {
         campaign::create_campaign(ctx, args)
     }
 
-    pub fn contribute_to_campaign(ctx: Context<campaign::Contribute>, amount: u64) -> Result<()> {
-        campaign::contribute_to_campaign(ctx, amount)
+    pub fn contribute(ctx: Context<campaign::Contribute>, amount: u64) -> Result<()> {
+        campaign::contribute(ctx, amount)
     }
 
-    pub fn withdraw_raised_funds(ctx: Context<withdrawal::WithdrawFunds>) -> Result<()> {
-        withdrawal::withdraw_raised_funds(ctx)
+    pub fn withdraw_funds(ctx: Context<withdrawal::WithdrawFunds>) -> Result<()> {
+        withdrawal::withdraw_funds(ctx)
     }
 
     pub fn claim_refund(ctx: Context<refund::ClaimRefund>) -> Result<()> {

@@ -1,4 +1,4 @@
-use crate::state::*;
+use crate::state::campaign::Campaign;
 use anchor_lang::prelude::*;
 
 #[derive(Accounts)]
@@ -7,7 +7,7 @@ pub struct WithdrawFunds<'info> {
     pub creator: Signer<'info>,
 
     #[account(mut)]
-    pub campaign: Account<'info, CampaignAccount>,
+    pub campaign: Account<'info, Campaign>,
 
     #[account(
         mut,
@@ -20,7 +20,7 @@ pub struct WithdrawFunds<'info> {
     pub system_program: Program<'info, System>,
 }
 
-pub fn withdraw_raised_funds(ctx: Context<WithdrawFunds>) -> Result<()> {
+pub fn withdraw_funds(ctx: Context<WithdrawFunds>) -> Result<()> {
     let campaign = &ctx.accounts.campaign;
     let vault = &mut ctx.accounts.vault;
     let creator = &mut ctx.accounts.creator;

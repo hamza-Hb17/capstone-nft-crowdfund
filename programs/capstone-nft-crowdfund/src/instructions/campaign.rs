@@ -1,6 +1,7 @@
-use crate::state::{
-    campaign::Campaign, contribution::ContributionAccount, reward_vault::RewardVault, vault::Vault,
-};
+use crate::state::campaign::Campaign;
+use crate::state::contribution::ContributionAccount;
+use crate::state::reward_vault::RewardVault;
+use crate::state::vault::Vault;
 use anchor_lang::prelude::*;
 
 use crate::error::ErrorCode;
@@ -95,7 +96,7 @@ pub struct Contribute<'info> {
     pub system_program: Program<'info, System>,
 }
 
-pub fn contribute_to_campaign(ctx: Context<Contribute>, amount: u64) -> Result<()> {
+pub fn contribute(ctx: Context<Contribute>, amount: u64) -> Result<()> {
     // let amount = 1_000_000_000; // 1 SOL
 
     require!(amount > 0, ErrorCode::InvalidAmount);
